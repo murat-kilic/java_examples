@@ -60,9 +60,9 @@ public class JavaExecutor
 
        System.out.println("We will run the "+methodName+" method of class "+className+" from this JAR file "+jarName);
 
-	ClassLoader classLoader = JavaExecutor.class.getClassLoader();
 
 	try{
+		ClassLoader classLoader = JavaExecutor.class.getClassLoader();
 		Path jarPath = Paths.get(jarName);
    		URLClassLoader urlClassLoader = new URLClassLoader(
       			new URL[] {jarPath.toUri().toURL()},
