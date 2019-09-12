@@ -22,10 +22,11 @@ public class JavaExecutor
     private static Options options = new Options();
 
     public static void main(String[] args ) {
-	String jarName="",className="",methodName="";
+	String jarName="",className="",methodName="",methodData=null;
 	options.addOption("c","class",true,"Fully qualified lass name in the form of package_name.class_name")
 	       .addOption("m","method",true,"Method name to be executed")
-	       .addOption("j","jar",true,"Full path of JAR file that includes the class and required code");
+	       .addOption("j","jar",true,"Full path of JAR file that includes the class and required code")
+	       .addOption("d","data",true,"Data to be passed to method in JSON format");
 	  
 	 CommandLineParser parser = new BasicParser();
 	     CommandLine cmd = null;
@@ -51,14 +52,21 @@ public class JavaExecutor
 			      log("Missing --jar option");
 			      help();
 		      }
+		 if (cmd.hasOption("d"))
+		   methodData=cmd.getOptionValue("d");	 
 
 	          } catch (ParseException e) {
 	               log("Failed to parse comand line properties");
 	                    e.printStackTrace();
 	                     help();
                 }
+	
+		if (methodData == null){
+       			log("We will run the "+methodName+" method of class "+className+" from this JAR file "+jarName);
+		}else {
+			log("We will run the "+methodName+" method of class "+className+" from this JAR file "+jarName+" with method data: "+methodData);
+    		}
 
-       System.out.println("We will run the "+methodName+" method of class "+className+" from this JAR file "+jarName);
 
 
 	try{
@@ -68,9 +76,12 @@ public class JavaExecutor
       			new URL[] {jarPath.toUri().toURL()},
        		         classLoader);
 
-		Class javaDemoClass = urlClassLoader.loadClass(className);
-      		Method method = javaDemoClass.getMethod(methodName);
-      		method.invoke(null);
+		Class executableClass = urlClassLoader.loadClass(className);
+      		//Method method = executableClass.getMethod(methodName);
+		Method method = executableClass.getMethod(methodName,new Class[]{String.class});
+
+		Object obj1=executableClass.newInstance();
+      		method.invoke(obj1,methodData);
     	
     	}catch (MalformedURLException e) {
 		log("JAR file path problem");
@@ -92,7 +103,11 @@ public class JavaExecutor
 	        log("Could not invoke the method");
 	        e.printStackTrace();
 		help();
-	   }	
+	}catch (Exception e){
+		log("Exception occured");
+		e.printStackTrace();
+	        help();
+	}	
    }
 
 
