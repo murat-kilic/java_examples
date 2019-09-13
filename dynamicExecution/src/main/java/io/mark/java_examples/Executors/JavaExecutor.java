@@ -3,6 +3,7 @@ package io.mark.java_examples.Executors;
 import javax.tools.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.MalformedURLException;
@@ -16,13 +17,18 @@ import org.apache.commons.cli.BasicParser;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 public class JavaExecutor
 
   {
     private static Options options = new Options();
 
     public static void main(String[] args ) {
-	String jarName="",className="",methodName="",methodData=null;
+	String jarName="",className="",methodName="";
+	String methodData=null;
+	
 	options.addOption("c","class",true,"Fully qualified lass name in the form of package_name.class_name")
 	       .addOption("m","method",true,"Method name to be executed")
 	       .addOption("j","jar",true,"Full path of JAR file that includes the class and required code")
@@ -77,11 +83,40 @@ public class JavaExecutor
        		         classLoader);
 
 		Class executableClass = urlClassLoader.loadClass(className);
-      		//Method method = executableClass.getMethod(methodName);
-		Method method = executableClass.getMethod(methodName,new Class[]{String.class});
-
+		
+		Method method;
 		Object obj1=executableClass.newInstance();
-      		method.invoke(obj1,methodData);
+		Object returnedObject=null;
+		Gson gson = new GsonBuilder()
+		         	   .setLenient()
+		                   .create();
+
+		Method[] methods=executableClass.getDeclaredMethods();
+		for (Method m : methods) {
+			if (m.getName().equals(methodName)) {
+				Class[] pTypes = m.getParameterTypes();
+		 		if (pTypes.length == 1) {
+					Class pType=pTypes[0];
+					method = executableClass.getMethod(methodName,new Class[]{pType});
+					returnedObject=method.invoke(obj1,gson.fromJson(methodData,pType));
+					break;
+				}else if(pTypes.length == 0) {
+					method = executableClass.getMethod(methodName);
+					returnedObject=method.invoke(obj1);
+
+					break;
+				}else 
+					continue;
+			}
+
+
+		}
+
+		if (returnedObject == null) 
+		     log("");
+		 else
+		     log(gson.toJson(returnedObject));
+
     	
     	}catch (MalformedURLException e) {
 		log("JAR file path problem");
