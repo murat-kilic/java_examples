@@ -1,0 +1,24 @@
+syntax = "proto3";
+package io.mark.java_examples.Executors.grpc;
+option java_multiple_files = true;
+
+message ExecutionRequest {
+// Fully qualifies class name
+  string className = 1;
+  string methodName = 2;
+  string jarLocation = 3;
+  // data in JSON
+  string data = 4;
+}
+
+message ExecutionResponse {
+  string errCode = 1;
+  // data in JSON
+  string data = 2;
+}
+
+service ExecutionService {
+  // Define a RPC operation
+  rpc execute(ExecutionRequest) returns (ExecutionResponse);
+}
+
