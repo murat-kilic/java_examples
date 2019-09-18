@@ -2,7 +2,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>DynamicExecutableCode</groupId>
-  <artifactId>ExecutibleCode</artifactId>
+  <artifactId>ExecutableCode</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>dynamicExecutable-example</name>
